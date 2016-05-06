@@ -6,7 +6,7 @@ Software engineer in Seattle with too many hobbies. Too many hobbies and not eno
 
 Employment
 =
-I'm currently working EMC<sup>2</sup> Isilon in authentication.
+I'm currently working at EMC<sup>2</sup> Isilon in authentication.
 
 Projects
 =
