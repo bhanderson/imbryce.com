@@ -1,0 +1,229 @@
+---
+layout: post
+title:  "DEFCON 24 OpenCTF Writup"
+date:   2016-08-07 0:0:0 -0800
+categories: programming ctf
+---
+DEFCON OpenCTF is an amateur CTF that is open to anyone who signs up and is "at"
+DEFCON during the event. I say "at" because you just need to be there to sign up
+and set up your equipment. Your team doesn't need to be in the room at the time,
+since they have no way of enforcing that.
+
+The CTF is set up in a Jeopardy style question mode where there are a few
+problems open at the beginning and when enough problems get solved the people
+who solve the last problems get to open new questions of their choice. The
+reason for this I'm told is to give an advantage to the smaller teams, so large
+teams can't just put one person on each problem and work it out.
+
+The team I am a part of along with co-workers and friends is xip. This year we
+placed 9th overall. We scored much more points this year than last year, so I
+feel we did an excellent job.
+
+I worked on a number of problems. The first one is usually a gimme and worth
+practically nothing but makes sure you can access the scoreboard. We logged into
+the scoreboard this year by an ssh private key generated for us by the OpenCTF
+admins. This was encoded in a QR code onto a receipt printed on receipt paper
+along with other information which I will get to later.
+
+I used my iPhone's camera to read the QR code and copy it over to cryptbin.com .
+One of the downsides of going to DEFCON is if you really want to stay secure you
+don't bring a laptop with anything important on it and you don't log into any
+services using WIFI or other wireless protocols. Although I hear LTE is generally
+okay. After copying down the private key to my laptop I put it on our CTF box
+for everyone to copy themselves and use. I will do a writeup on the CTF box some
+other time.
+
+#### #TODO ^
+
+On the receipt we were given two IP addresses. One for the scoreboard which
+shows how many points each team currently has, and the questions. And one for a
+box the admins set up if we needed one. Using the ssh key we then log into the
+scoreboard box and select the question. Questions range from an IP address and
+port, just a hint at what you need to find or where to look, or a binary and any
+combination of the above.
+
+## Sanity Check
+The first question this year as it was last year I believe was shown like so.
+`
+Hack the ______!
+`
+If anyone has seen the movie Hackers you should know the answer is 'Planet'. The
+OpenCTF group had also posted a hint on twitter earlier in the day about
+something needing to be capitalized.
+
+## Puzzletime
+The other problem I successfully solved was a file that contained a hex value
+and directional IDs (top, bottom, left, right). This file translated to a bitmap
+image, the IDs were unique to two lines. For example on one line there would be
+a top ID of 1234, and the only other place 1234 was found would be another line
+with 1234 as the bottom ID. Essentially a scrambled matrix.
+
+Given file.
+
+```
+Value,Right Edge Id,Bottom Edge Id,Left Edge Id,Top Edge Id
+0x111811,105686801264,887560873655,312990448974,548925778434
+0x384126,650152958814,52199694120,211764317707,433816471245
+0xc3bab1,5909959089,950174968371,749641960137,537615257711
+0x3e4a24,916756480148,216091138945,804727523965,811655369006
+0x3a4d31,426308808667,931973485956,787722656299,55311493582
+...
+```
+
+To solve this I created a class block. A forewarning, CTF code is hastily
+written and thrown together. This is in no way the best way to solve the
+problem. The full files will be available on my github
+
+#### #TODO ^
+
+{% highlight python %}
+class block:
+    color = 0
+    bottom = 0
+    top = 0
+    left = 0
+    right = 0
+
+    def __init__(self, c,r,b,l,t):
+        self.color = c
+        self.right = r
+        self.bottom = b
+        self.left = l
+        self.top = t
+
+    def __str__(self):
+        return "{0}:{1},{2},{3},{4}".format(self.color, self.right, self.bottom, self.left, self.top)
+{% endhighlight %}
+
+I then opened the file and iterated over the contents
+
+{% highlight python %}
+blocks=[]
+for l in content:
+    l.strip('\r\n')
+    splitted = l.split(',')
+    color = splitted[0]
+    right = int(splitted[1])
+    bottom = int(splitted[2])
+    left = int(splitted[3])
+    top = int(splitted[4])
+    blocks.append(block(color, right, bottom, left, top))
+{% endhighlight %}
+
+One can easily find the top left block by finding the line with top and left IDs
+which are zero.
+
+{% highlight python %}
+top_left = [x for x in blocks if (x.top == 0 and x.left == 0)][0]
+{% endhighlight %}
+
+Then just find the next one to the right and shift down when you get to the end.
+
+{% highlight python %}
+while current.bottom is not 0 and current.right is not 0:
+    row = []
+    row.append(current)
+    output.write(current.color + ' ')
+    while current.right is not 0:
+        n = [x for x in blocks if (x.left == current.right)][0]
+        row.append(n)
+        #print(n)
+        current = n
+        output.write(n.color + ' ')
+    output.write('\n')
+    current = row[0]
+    n = [x for x in blocks if (x.top == current.bottom)][0]
+    current = n
+    #matrix.append(row)
+    #print('added row')
+output.write('\n')
+output.close()
+{% endhighlight %}
+
+This will write the hex output in ascii (probably making the next part harder
+than it needs to be but what I did at the time). The lines are like so
+
+```
+0x799394 0x678182 0x5b7478 0x587175 0x48636a 0x2e4950 0x1d3843 0x1c3742 ...
+0x6e8688 0x607a7b 0x566f73 0x516a6e 0x486166 0x365158 0x2c444e 0x28434e ...
+...
+```
+
+Now we have all the color values in the right places and know how big the image
+is by how many hex values we have in a row and column.
+
+This then needs to be written as actual hex and a header and footer added so an
+image view knows what it is. This unfortunately was the most frustrating part as
+getting the hex just right is important. I ended up just finding a BMP image on
+the internet that was the correct size and copy-pasting the header and footing
+into the hex file.
+
+So first we open the file and write the hex for the header.
+
+{% highlight python %}
+output = open('raw_hex.bmp', 'w')
+output.write(binascii.unhexlify('424dee390200000000003600'))
+output.write(binascii.unhexlify('000028000000ec000000ce00'))
+output.write(binascii.unhexlify('00000100180000000000b839'))
+output.write(binascii.unhexlify('020000000000000000000000'))
+output.write(binascii.unhexlify('000000000000'))
+{% endhighlight %}
+
+I did it in these chucks because that is how many hex digits my hex editor was
+showing per line. The next step is just to iterate over the hex ascii code and
+print it as real hex. Then print the footer.
+
+{% highlight python %}
+for l in content:
+    hexes = l.strip('\n').split(' ')[:-1]
+    #print(hexes)
+    for x in hexes:
+        print(x[2:])
+        trimmed = binascii.unhexlify(x[2:])
+        #print(trimmed)
+            #print(trimmed)
+        output.write(trimmed)
+
+output.write(binascii.unhexlify('ffd9'))
+output.close()
+{% endhighlight %}
+
+This gives us a bmp picture. Of a kid (baby goat not human child) with the flag
+overlaid as.
+
+```
+PuzzleGoatKeyIsBestKey
+```
+
+## The Price Is right
+We did not get this question but it is infuriating enough that it is worth a
+writeup. It's infuriating because once you know the solution its so simple but
+hard to get that first step.
+
+On our receipt we were given a list of debits and credits for things such as
+custom team name, etc.  These numbers were wildly different from each other and
+very large, they did not seem to have any pattern. The total also did not match,
+which was printed as `~3.50`.
+
+We first tried adding them up to find the actual total and tried multiple
+different rotations and bases to see if there was some code hidden in the total.
+We then tried concatenating them and seeing if they represented hex values or
+octal or something. We tried all the other things we tried on the first attempt
+on the concatination. We tried many different solution and a couple of us spend
+a few hours trying to find it. I eventually found that the first 4 numbers on
+the list `5117` Can sort of be changed to `F 1 a g` if you take the 5th
+letter, use `1` as an `l` because you are `leet` and many other flags are that way,
+and use the 7th letter `g`. This ended up being an unintentional red herring. Or
+an intentional one if the admins really hated us.
+
+The end solution, which we asked the admins after the CTF was to, concatenate
+(not add) all the numbers together to get one large number. You then change this
+number to a hex value and each one of the hex values is a letter that became the
+flag. Seems simple once you know the answer but choosing from so many different
+obfuscation techniques leads to a multitude of wrong turns. The price is wrong
+Bob.
+
+Overall OpenCTF was an awesome experience and gives a great introduction into
+reverse engineering problems and problem solving difficult questions. A big
+thank you (and screw you) to the problem creators: Kajer, soen, Yen, yotta,
+arronp, and Drifter.
