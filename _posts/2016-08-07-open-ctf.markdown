@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "DEFCON 24 OpenCTF Writup"
+title:  "DEFCON 24 OpenCTF Write-up"
 date:   2016-08-07 0:0:0 -0800
 categories: programming ctf
 ---
@@ -30,7 +30,7 @@ One of the downsides of going to DEFCON is if you really want to stay secure you
 don't bring a laptop with anything important on it and you don't log into any
 services using WIFI or other wireless protocols. Although I hear LTE is generally
 okay. After copying down the private key to my laptop I put it on our CTF box
-for everyone to copy themselves and use. I will do a writeup on the CTF box some
+for everyone to copy themselves and use. I will do a write-up on the CTF box some
 other time.
 
 #### #TODO ^
@@ -197,7 +197,7 @@ PuzzleGoatKeyIsBestKey
 
 ## The Price Is right
 We did not get this question but it is infuriating enough that it is worth a
-writeup. It's infuriating because once you know the solution its so simple but
+write-up. It's infuriating because once you know the solution its so simple but
 hard to get that first step.
 
 On our receipt we were given a list of debits and credits for things such as
