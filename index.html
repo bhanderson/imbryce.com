@@ -1,47 +1,23 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>imBryce.com</title>
-        <style>
-body {
-    color: white;
-    background-color: #6d695c;
-    background-image:
-        repeating-linear-gradient(120deg, rgba(255,255,255,.1), rgba(255,255,255,.1) 1px, transparent 1px, transparent 60px),
-        repeating-linear-gradient(60deg, rgba(255,255,255,.1), rgba(255,255,255,.1) 1px, transparent 1px, transparent 60px),
-        linear-gradient(60deg, rgba(0,0,0,.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.1) 75%, rgba(0,0,0,.1)),
-        linear-gradient(120deg, rgba(0,0,0,.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.1) 75%, rgba(0,0,0,.1));
-    background-size: 70px 120px;" title="Argyle" data-author="Anna Kassner" data-author-url="http://annamation.ca/"
-}
-footer {
-    position:absolute;
-    bottom:0;
-    width: 99%;
-    height:60px;   /* Height of the footer */
-}
-        </style>
-    </head>
-    <body>
-        <center>
-            <h1>Bryce Handerson</h1>
-            <h2><a href="https://github.com/bhanderson">Github</a></h2>
-            <h2><a href="https://www.linkedin.com/in/brycehanderson">Linkedin</a></h2>
-        </center>
-        <p>Software engineer in Seattle with too many hobbies. Too many hobbies and not enough time to work on this website.</p>
+---
+layout: default
+---
 
-        <h3 id="employment">Employment</h3>
-        <p>I’m currently working at EMC<sup>2</sup> Isilon in authentication.</p>
+<div class="home">
 
-        <h3 id="projects">Projects</h3>
-        <ul>
-            <li>My latest project <a href="https://github.com/bhanderson/pbnh">pbnh</a> is probably one of the most fun one I’ve helped work on lately.</li>
-            <li><a href="https://github.com/bhanderson/beervintory">Beervintory</a> is a website I wrote for helping me keep track of the kegerators at work.</li>
-        </ul>
-        <center>
-        <footer>
-            <a href="mailto:bryce.handerson@gmail.com">bryce.handerson@gmail.com</a>
-        </footer>
-        </center>
-    </body>
-</html>
+  <h1 class="page-heading">Posts</h1>
+
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+
+        <h2>
+          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title | escape }}</a>
+        </h2>
+      </li>
+    {% endfor %}
+  </ul>
+
+<!--  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>--!>
+
+</div>
