@@ -1,0 +1,70 @@
+---
+layout: post
+title:  "DEFCON 24 CTF Box"
+date:   2016-08-12 0:0:0 -0800
+categories: ctf linux
+---
+Our team at CTF uses a linux server to NAT our connection and run some simple
+services. It also runs a firewall between us and the CTF network which helps
+with protecting our PCs in case of some adventurous competitors.
+
+## Hardware
+The box we use is a [ZOTAC ZBOX E1730
+Plus](https://www.amazon.com/ZOTAC-Workstation-quad-core-Processor-ZBOX-EI730-P-U/dp/B00JN1SW0W).
+It has a 1TB HD and 8GB of ram, and a core i5. The best part is it has two
+ethernet ports which means we can have a connection to the CTF network and a
+local LAN for the team. The 1TB HD is great for storing VMs and OS isos, you
+never know when you are going to need a win xp vm to run a specific binary.
+
+## Software
+The box itself is running Debian 8 (Jessie). On this we run a DHCP server to
+assign local IPs the LAN.
+
+### DHCP
+The dhcp server can be installed easily enough `sudo apt-get install
+isc-dhcp-server`. Then edit the configuration file `sudo vim
+/etc/dhcp/dhcpd.conf`. Comment or delete everything and add the following.
+
+```
+ddns-update-style none;
+option domain-name "xip.local";
+default-lease-time 600;
+max-lease-time 7200;
+log-facility local7;
+option classless-routes code 121 = array of unsigned integer 8;
+subnet 192.168.123.0 netmask 255.255.255.0 {
+    range 192.168.123.100 192.168.123.200;
+    option classless-routes 16, 172,31, 192,168,123,1
+    eth0;
+}
+```
+
+The particular settings that will be specific to the CTF and the individual are
+`option domain-name`, and `option classless-routes`. Depending on the CTF
+network you will want to change the subnet and routes so that the LAN does not
+overlap the network and so your box pushes the network routes. In our case all
+the problems except for a few fancy network ones were on the 172.31 subnet. We
+chose the 192.168.123 subnet because it is easy to remember and not usually
+used.
+
+### IRC
+We did not utilize the IRC server too much but it was useful to post what
+problem you were currently working on and if you changed problems so you don't
+have to keep asking and remembering who is working on what problem. I used the
+inspircd server for this `sudo apt-get install inspircd`. The only setting I
+changed was the bind address in `/etc/inspircd/inspircd.conf` to listen on the
+LAN.
+
+```
+<bind address="192.168.123.0" port="6667" type="clients">
+```
+
+There are a ton of other settings you can set and enable such as ssl and
+passwords. But I figured since we have a firewall set up and are only listening
+on the LAN and don't post keys to the IRC, it should be OK.
+
+### PASTEBIN
+I and a friend wrote a pastebin clone that is kind of a mix of pbnh and haste.
+With this server we could post anything we want. We did not use it but the code
+is here to deploy it [pbnh](https://github.com/bhanderson/pbnh).
+
