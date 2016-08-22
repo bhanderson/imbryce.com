@@ -63,8 +63,13 @@ There are a ton of other settings you can set and enable such as ssl and
 passwords. But I figured since we have a firewall set up and are only listening
 on the LAN and don't post keys to the IRC, it should be OK.
 
-### PASTEBIN
+### Pastebin
 I and a friend wrote a pastebin clone that is kind of a mix of pbnh and haste.
 With this server we could post anything we want. We did not use it but the code
 is here to deploy it [pbnh](https://github.com/bhanderson/pbnh).
 
+### Firewall
+For a firewall, which everyone should be using. We used UFW `sudo apt-get
+install ufw` and to enable `sudo ufw enable`. The only gotcha here is to make
+sure you have it enabled on the correct ethernet port, and to allow traffic from
+the internal network anywhere. `sudo ufw allow in on eth0 to any`
