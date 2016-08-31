@@ -21,7 +21,8 @@ The box itself is running Debian 8 (Jessie). On this we run a DHCP server to
 assign local IPs the LAN.
 
 ### UFW
-We need to allow users from the local intranet out to the ctfw network
+If you are not running a firewall in a ctf, you should be.
+We need to allow users from the local intranet out to the ctf network
 
 ```
 sudo ufw allow in on eth0 to any
@@ -32,7 +33,7 @@ file.
 
 ```
 *nat
-:POSTROUTING ACCPET [0:0]
+:POSTROUTING ACCEPT [0:0]
 -A POSTROUTING -s 192.168.123.0/24 -o eth1 -j MASQUERADE
 COMMIT
 ```
