@@ -33,8 +33,6 @@ okay. After copying down the private key to my laptop I put it on our CTF box
 for everyone to copy themselves and use. I will do a write-up on the CTF box some
 other time.
 
-#### #TODO ^
-
 On the receipt we were given two IP addresses. One for the scoreboard which
 shows how many points each team currently has, and the questions. And one for a
 box the admins set up if we needed one. Using the ssh key we then log into the
